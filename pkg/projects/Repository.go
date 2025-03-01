@@ -74,7 +74,7 @@ func (r *repository) DeleteProject(id string) error {
 func loadEnv(key string) string {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("failed loading .env")
+		log.Fatal("failed loading .env with key " + key)
 	}
 	return os.Getenv(key)
 }
