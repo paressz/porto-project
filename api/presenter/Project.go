@@ -11,6 +11,7 @@ type ProjectSuccessResponse struct {
 type ProjectsSuccessResponse struct {
     Status string `json:"status"`
 	Message string `json:"message"`
+	LastIntId int `json:"lastIntId"`
 	Project []projects.Project `json:"projects"`
 }
 

@@ -6,11 +6,15 @@ import (
 	"porto-project/pkg/projects"
 )
 
-func SetupRoutes(app *fiber.App, service projects.Service) {
-	app.Get("/projects", Handler.GetProjects(service))
-	app.Post("/projects", Handler.AddProject(service))
-	app.Get("/projects/:id", Handler.GetProjectById(service))
-	app.Use(func (c *fiber.Ctx) error {
+func SetupProjectsRoutes(router fiber.Router, service projects.Service) {
+	//url: /api/
+	router.Get("/projects", Handler.GetProjects(service))
+	router.Post("/projects", Handler.AddProject(service))
+	router.Get("/projects/:id", Handler.GetProjectById(service))
+	router.Delete("/projects/:id", Handler.DeleteProject(service))
+	router.Put("/projects/:id", Handler.EditProject(service))
+	router.Static("/projects/images/", "./uploads/projects/")
+	router.Use(func (c *fiber.Ctx) error {
 		return c.Status(403).SendString("Unauthorized")
 	})
 }

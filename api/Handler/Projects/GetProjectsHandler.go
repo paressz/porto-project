@@ -8,7 +8,10 @@ import (
 )
 func GetProjects(s projects.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
-		projectList, err := s.GetAllProjects()
+		lastId := c.QueryInt("last_id", 0)
+		projectList, err := s.GetAllProjects(lastId)
+		lastIndex := len(projectList)-1
+		lastIntId := projectList[lastIndex].IntId
 		if err != nil {
 			log.Debugf("Failed to fetch projects: %s", err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
@@ -20,6 +23,7 @@ func GetProjects(s projects.Service) fiber.Handler{
 		return c.Status(fiber.StatusOK).JSON(presenter.ProjectsSuccessResponse{
 			"Success",
 			"Projects fetched",
+			lastIntId,
 			projectList,
 		})
 	}

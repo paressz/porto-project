@@ -11,6 +11,10 @@ func main() {
 	app := fiber.New()
 	projectRepo := projects.NewRepository()
 	projectService := projects.NewService(projectRepo)
-	routes.SetupRoutes(app, projectService)
+	api := app.Group("/api")
+	routes.SetupProjectsRoutes(api, projectService)
+	app.Use(func (c *fiber.Ctx) error {
+		return c.Status(403).SendString("Unauthorized")
+	})
 	log.Fatal(app.Listen(":8080"))
 }

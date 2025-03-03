@@ -11,7 +11,7 @@ import (
 
 type Repository interface {
 	CreateProject(project *Project) (*Project, error)
-	GetAllProjects() ([]Project, error)
+	GetAllProjects(lastId int) ([]Project, error)
 	GetProjectById(id string) (*Project, error)
 	EditProject(project *Project) (string, error)
 	DeleteProject(id string) error
@@ -51,9 +51,9 @@ func (r *repository) CreateProject(project *Project) (*Project, error) {
 	return project, r.Db.Create(project).Error
 }
 
-func (r *repository) GetAllProjects() ([]Project, error) {
+func (r *repository) GetAllProjects(lastId int) ([]Project, error) {
 	var projects []Project
-	err := r.Db.Find(&projects).Error
+	err := r.Db.Where("int_id > ?", lastId).Limit(9).Find(&projects).Error
 	return projects, err
 }
 
@@ -64,7 +64,11 @@ func (r *repository) GetProjectById(id string) (*Project, error) {
 }
 
 func (r *repository) EditProject(project *Project) (string, error) {
-	return project.Id, r.Db.Save(project).Error
+	return project.Id, r.Db.Model(&project).Updates(Project{
+		Name: project.Name,
+		Description: project.Description,
+		ImageUrl: project.ImageUrl,
+	}).Error
 }
 
 func (r *repository) DeleteProject(id string) error {
