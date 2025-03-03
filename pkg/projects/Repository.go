@@ -53,7 +53,7 @@ func (r *repository) CreateProject(project *Project) (*Project, error) {
 
 func (r *repository) GetAllProjects(lastId int) ([]Project, error) {
 	var projects []Project
-	err := r.Db.Where("int_id > ?", lastId).Limit(9).Find(&projects).Error
+	err := r.Db.Where("int_id > ?", lastId).Limit(9).Order("int_id ASC").Find(&projects).Error
 	return projects, err
 }
 
@@ -72,7 +72,7 @@ func (r *repository) EditProject(project *Project) (string, error) {
 }
 
 func (r *repository) DeleteProject(id string) error {
-	return r.Db.Delete(&Project{}, id).Error
+	return r.Db.Where("id = ?", id).Delete(&Project{}).Error
 }
 
 func loadEnv(key string) string {

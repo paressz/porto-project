@@ -8,7 +8,7 @@ import (
 )
 func GetProjects(s projects.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
-		lastId := c.QueryInt("last_id", 0)
+		lastId := c.QueryInt("last_int_id", 0)
 		projectList, err := s.GetAllProjects(lastId)
 		lastIndex := len(projectList)-1
 		lastIntId := projectList[lastIndex].IntId
