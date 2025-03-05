@@ -8,8 +8,15 @@ import (
 )
 func GetProjects(s projects.Service) fiber.Handler{
 	return func(c *fiber.Ctx) error {
-		lastId := c.QueryInt("last_int_id", 0)
-		projectList, err := s.GetAllProjects(lastId)
+		lastIId := c.QueryInt("last_int_id", 0)
+		projectList, pageCount, err := s.GetAllProjects(lastIId)
+		if len(projectList) < 1 || projectList == nil {
+			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
+				"Failed",
+				"Failed fetching projects",
+				"No projects with int_id > last_int_id",
+			})
+		}
 		lastIndex := len(projectList)-1
 		lastIntId := projectList[lastIndex].IntId
 		if err != nil {
@@ -24,6 +31,7 @@ func GetProjects(s projects.Service) fiber.Handler{
 			"Success",
 			"Projects fetched",
 			lastIntId,
+			pageCount,
 			projectList,
 		})
 	}

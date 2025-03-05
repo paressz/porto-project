@@ -12,6 +12,7 @@ type ProjectsSuccessResponse struct {
     Status string `json:"status"`
 	Message string `json:"message"`
 	LastIntId int `json:"lastIntId"`
+	PageCount int64 `json:"pageCount"`
 	Project []projects.Project `json:"projects"`
 }
 

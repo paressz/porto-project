@@ -2,7 +2,7 @@ package projects
 
 type Service interface {
 	CreateProject(project *Project) (*Project, error)
-	GetAllProjects(lastId int) ([]Project, error)
+	GetAllProjects(lastId int) ([]Project, int64, error)
 	GetProjectById(id string) (*Project, error)
 	EditProject(project *Project) (string, error)
 	DeleteProject(id string) error
@@ -21,7 +21,7 @@ func (s *service) CreateProject(project *Project) (*Project, error) {
 	return s.repository.CreateProject(project)
 }
 
-func (s *service) GetAllProjects(lastId int) ([]Project, error) {
+func (s *service) GetAllProjects(lastId int) ([]Project, int64, error) {
 	return s.repository.GetAllProjects(lastId)
 }
 

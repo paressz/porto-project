@@ -1,17 +1,18 @@
 package projects
 
 import (
-	"gorm.io/gorm"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
+	"math"
 	"os"
 )
 
 type Repository interface {
 	CreateProject(project *Project) (*Project, error)
-	GetAllProjects(lastId int) ([]Project, error)
+	GetAllProjects(lastId int) ([]Project, int64, error)
 	GetProjectById(id string) (*Project, error)
 	EditProject(project *Project) (string, error)
 	DeleteProject(id string) error
@@ -51,10 +52,14 @@ func (r *repository) CreateProject(project *Project) (*Project, error) {
 	return project, r.Db.Create(project).Error
 }
 
-func (r *repository) GetAllProjects(lastId int) ([]Project, error) {
+func (r *repository) GetAllProjects(last_int_id int) ([]Project, int64, error) {
 	var projects []Project
-	err := r.Db.Where("int_id > ?", lastId).Limit(9).Order("int_id ASC").Find(&projects).Error
-	return projects, err
+	var count int64
+	r.Db.Model(&projects).Count(&count)
+	itemAmount := 9
+	pageCount := int64(math.Ceil(float64(count)/float64(itemAmount)))
+	err := r.Db.Where("int_id > ?", last_int_id).Limit(itemAmount).Order("int_id ASC").Find(&projects).Error
+	return projects, pageCount, err
 }
 
 func (r *repository) GetProjectById(id string) (*Project, error) {
