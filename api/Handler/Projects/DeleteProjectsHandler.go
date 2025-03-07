@@ -2,9 +2,9 @@ package Handler
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 	"porto-project/api/presenter"
 	"porto-project/pkg/projects"
+	//"porto-project/pkg/util"
 )
 
 func DeleteProject(s projects.Service) fiber.Handler {

@@ -8,7 +8,7 @@ import (
 	"porto-project/api/presenter"
 	"porto-project/pkg/model"
 	"porto-project/pkg/projects"
-	"porto-project/pkg/util"
+	"porto-project/pkg/util/file"
 )
 
 func AddProject(s projects.Service) fiber.Handler {
@@ -37,14 +37,14 @@ func AddProject(s projects.Service) fiber.Handler {
 				Error:   err.Error(),
 			})
 		}
-		if !util.IsImage(img) {
+		if !file.IsImage(img) {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
 				Status:  "Failed",
 				Message: "Failed to upload image",
 				Error:   "Invalid MIME type or extension",
 			})
 		}
-		imgPath, err := util.SaveImage(c, img, project.Id)
+		imgPath, err := file.SaveImage(c, img, project.Id)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
 				Status:  "Failed",
@@ -52,7 +52,7 @@ func AddProject(s projects.Service) fiber.Handler {
 				Error:   err.Error(),
 			})
 		}
-		err = util.CompressImage(imgPath)
+		err = file.CompressImage(imgPath)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
 				Status:  "Failed",

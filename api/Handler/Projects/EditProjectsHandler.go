@@ -7,7 +7,7 @@ import (
 	"porto-project/api/presenter"
 	"porto-project/pkg/model"
 	"porto-project/pkg/projects"
-	"porto-project/pkg/util"
+	"porto-project/pkg/util/file"
 )
 
 func EditProject(s projects.Service) fiber.Handler {
@@ -18,39 +18,32 @@ func EditProject(s projects.Service) fiber.Handler {
 		project.Name, project.Description = c.FormValue("name"), c.FormValue("description")
 
 		img, err := c.FormFile("image")
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				Status:  "Failed",
-				Message: "Key: 'image' is not found or empty",
-				Error:   err.Error(),
-			})
+		if img != nil {
+			if !file.IsImage(img) {
+				return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
+					Status:  "Failed",
+					Message: "Failed to upload image",
+					Error:   "Invalid MIME type or extension",
+				})
+			}
+			imgPath, err := file.SaveImage(c, img, project.Id)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
+					Status:  "Failed",
+					Message: "Failed to save image",
+					Error:   err.Error(),
+				})
+			}
+			err = file.CompressImage(imgPath)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
+					Status:  "Failed",
+					Message: "Failed when compressing image",
+					Error:   err.Error(),
+				})
+			}
+			project.ImageUrl = "/api/projects/images/" + filepath.Base(imgPath)
 		}
-		if !util.IsImage(img) {
-			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				Status:  "Failed",
-				Message: "Failed to upload image",
-				Error:   "Invalid MIME type or extension",
-			})
-		}
-		imgPath, err := util.SaveImage(c, img, project.Id)
-		if err != nil {
-			log.Debugf("")
-			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				Status:  "Failed",
-				Message: "Failed to save image",
-				Error:   err.Error(),
-			})
-		}
-		err = util.CompressImage(imgPath)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				Status:  "Failed",
-				Message: "Failed when compressing image",
-				Error:   err.Error(),
-			})
-		}
-		
-		project.ImageUrl = "/api/projects/images/" + filepath.Base(imgPath)
 		updatedId, err := s.EditProject(project)
 		if err != nil {
 			log.Debug("Failed updating project in database: " + err.Error())

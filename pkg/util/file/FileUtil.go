@@ -1,6 +1,7 @@
-package util
+package file
 
 import (
+	"errors"
 	"github.com/disintegration/imaging"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
@@ -71,4 +72,22 @@ func IsImageByExtension(fileName string) bool {
 	}
 	log.Debug("IsImageByExtension: Invalid file extension: " + fileName)
 	return false
+}
+
+func DeleteFile(filePath string) error {
+	_, err := os.Stat(filePath)
+	if err == nil {
+		err = os.Remove(filePath)
+		if err != nil {
+			log.Debug("deleteFile: Failed deleting file: " + filePath)
+			return errors.New("file Not found")
+		}
+	} else if errors.Is(err, os.ErrNotExist) {
+		log.Debug("deleteFile: File not found: " + filePath)
+		return errors.New("file not found")
+	} else {
+		log.Debug("deleteFile: error: " + err.Error())
+		return errors.New(err.Error())
+	}
+	return err
 }
