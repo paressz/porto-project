@@ -6,12 +6,14 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"path/filepath"
 	"porto-project/api/presenter"
+	"porto-project/pkg/model"
 	"porto-project/pkg/projects"
+	"porto-project/pkg/util"
 )
 
 func AddProject(s projects.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		project := new(projects.Project)
+		project := new(model.Project)
 		name, description := c.FormValue("name"), c.FormValue("description")
 		project.Name, project.Description = name, description
 
@@ -19,9 +21,9 @@ func AddProject(s projects.Service) fiber.Handler {
 		if err != nil {
 			log.Debugf("Error generating ID: %s", err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed when generating ID",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed when generating ID",
+				Error:   err.Error(),
 			})
 		}
 		project.Id = "project_" + newId
@@ -30,41 +32,41 @@ func AddProject(s projects.Service) fiber.Handler {
 		img, err := c.FormFile("image")
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Key: 'image' is not found or empty",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Key: 'image' is not found or empty",
+				Error:   err.Error(),
 			})
 		}
-		if !isImage(img) {
+		if !util.IsImage(img) {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed to upload image",
-				"Invalid MIME type or extension",
+				Status:  "Failed",
+				Message: "Failed to upload image",
+				Error:   "Invalid MIME type or extension",
 			})
 		}
-		imgPath, err := saveImage(c, img, project.Id)
+		imgPath, err := util.SaveImage(c, img, project.Id)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed to save image",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed to save image",
+				Error:   err.Error(),
 			})
 		}
-		err = compressImage(imgPath)
+		err = util.CompressImage(imgPath)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed when compressing image",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed when compressing image",
+				Error:   err.Error(),
 			})
 		}
 		
 		project.ImageUrl = "/api/projects/images/" + filepath.Base(imgPath)
 		result, err := s.CreateProject(project)
 		return c.Status(fiber.StatusCreated).JSON(presenter.ProjectSuccessResponse{
-			"Success",
-			"Project Created",
-			result,
+			Status:  "Success",
+			Message: "Project Created",
+			Project: result,
 		})
 	}
 }

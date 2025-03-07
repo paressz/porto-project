@@ -5,12 +5,14 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 	"path/filepath"
 	"porto-project/api/presenter"
+	"porto-project/pkg/model"
 	"porto-project/pkg/projects"
+	"porto-project/pkg/util"
 )
 
 func EditProject(s projects.Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		project := new(projects.Project)
+		project := new(model.Project)
 		id := c.Params("id")
 		project.Id = id
 		project.Name, project.Description = c.FormValue("name"), c.FormValue("description")
@@ -18,32 +20,33 @@ func EditProject(s projects.Service) fiber.Handler {
 		img, err := c.FormFile("image")
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Key: 'image' is not found or empty",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Key: 'image' is not found or empty",
+				Error:   err.Error(),
 			})
 		}
-		if !isImage(img) {
+		if !util.IsImage(img) {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed to upload image",
-				"Invalid MIME type or extension",
+				Status:  "Failed",
+				Message: "Failed to upload image",
+				Error:   "Invalid MIME type or extension",
 			})
 		}
-		imgPath, err := saveImage(c, img, project.Id)
+		imgPath, err := util.SaveImage(c, img, project.Id)
 		if err != nil {
+			log.Debugf("")
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed to save image",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed to save image",
+				Error:   err.Error(),
 			})
 		}
-		err = compressImage(imgPath)
+		err = util.CompressImage(imgPath)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed when compressing image",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed when compressing image",
+				Error:   err.Error(),
 			})
 		}
 		
@@ -52,15 +55,15 @@ func EditProject(s projects.Service) fiber.Handler {
 		if err != nil {
 			log.Debug("Failed updating project in database: " + err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed updating project",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Failed updating project",
+				Error:   err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusOK).JSON(presenter.ProjectSuccessResponse{
-			"Success",
-			"Updated project " + updatedId,
-			project,
+			Status:  "Success",
+			Message: "Updated project " + updatedId,
+			Project: project,
 		})
 	}
 }

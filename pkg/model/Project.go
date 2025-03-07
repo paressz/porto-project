@@ -1,4 +1,4 @@
-package projects
+package model
 
 type Project struct {
 	Id				string 	`gorm:"primaryKey" json:"id"`

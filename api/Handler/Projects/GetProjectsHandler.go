@@ -11,10 +11,11 @@ func GetProjects(s projects.Service) fiber.Handler{
 		lastIId := c.QueryInt("last_int_id", 0)
 		projectList, pageCount, err := s.GetAllProjects(lastIId)
 		if len(projectList) < 1 || projectList == nil {
-			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Failed fetching projects",
-				"No projects with int_id > last_int_id",
+			return c.Status(fiber.StatusOK).JSON(presenter.ProjectsSuccessResponse{
+				Status:    "Success",
+				Message:   "Projects fetched",
+				PageCount: pageCount,
+				Project:   projectList,
 			})
 		}
 		lastIndex := len(projectList)-1
@@ -22,17 +23,17 @@ func GetProjects(s projects.Service) fiber.Handler{
 		if err != nil {
 			log.Debugf("Failed to fetch projects: %s", err.Error())
 			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Unable to fetch projects, try again later",
-				err.Error(),
+				Status:  "Failed",
+				Message: "Unable to fetch projects, try again later",
+				Error:   err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusOK).JSON(presenter.ProjectsSuccessResponse{
-			"Success",
-			"Projects fetched",
-			lastIntId,
-			pageCount,
-			projectList,
+			Status:    "Success",
+			Message:   "Projects fetched",
+			LastIntId: lastIntId,
+			PageCount: pageCount,
+			Project:   projectList,
 		})
 	}
 }
@@ -42,23 +43,22 @@ func GetProjectById(s projects.Service) fiber.Handler {
 		id := c.Params("id")
 		if id == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Invalid Id is empty",
-				"",
+				Status:  "Failed",
+				Message: "Invalid Id is empty",
 			})
 		}
 		project, err := s.GetProjectById(id)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
-				"Failed",
-				"Unable to fetch project with Id: " + id,
-				err.Error(),
+				Status:  "Failed",
+				Message: "Unable to fetch project with Id: " + id,
+				Error:   err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusOK).JSON(presenter.ProjectSuccessResponse{
-			"Success",
-			"Fetched project with Id: " + project.Id,
-			project,
+			Status:  "Success",
+			Message: "Fetched project with Id: " + project.Id,
+			Project: project,
 		})
 	}
 }

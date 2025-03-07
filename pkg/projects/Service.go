@@ -1,10 +1,12 @@
 package projects
 
+import "porto-project/pkg/model"
+
 type Service interface {
-	CreateProject(project *Project) (*Project, error)
-	GetAllProjects(lastId int) ([]Project, int64, error)
-	GetProjectById(id string) (*Project, error)
-	EditProject(project *Project) (string, error)
+	CreateProject(project *model.Project) (*model.Project, error)
+	GetAllProjects(lastId int) ([]model.Project, int64, error)
+	GetProjectById(id string) (*model.Project, error)
+	EditProject(project *model.Project) (string, error)
 	DeleteProject(id string) error
 }
 type service struct {
@@ -17,19 +19,19 @@ func NewService(repo Repository) Service {
 	}
 }
 
-func (s *service) CreateProject(project *Project) (*Project, error) {
+func (s *service) CreateProject(project *model.Project) (*model.Project, error) {
 	return s.repository.CreateProject(project)
 }
 
-func (s *service) GetAllProjects(lastId int) ([]Project, int64, error) {
+func (s *service) GetAllProjects(lastId int) ([]model.Project, int64, error) {
 	return s.repository.GetAllProjects(lastId)
 }
 
-func (s *service) GetProjectById(id string) (*Project, error) {
+func (s *service) GetProjectById(id string) (*model.Project, error) {
 	return s.repository.GetProjectById(id)
 }
 
-func (s *service) EditProject(project *Project) (string, error) {
+func (s *service) EditProject(project *model.Project) (string, error) {
 	return s.repository.EditProject(project)
 }
 

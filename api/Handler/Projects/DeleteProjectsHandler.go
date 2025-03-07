@@ -12,11 +12,10 @@ func DeleteProject(s projects.Service) fiber.Handler {
 		projectId := c.Params("id")
 		err := s.DeleteProject(projectId)
 		if err != nil {
-			log.Debug("DeleteProject: Failed to delete project cause " + err.Error())
-			return c.Status(fiber.StatusInternalServerError).JSON(presenter.FailedResponse{
-				"Failed",
-				"Unable to delete project",
-				err.Error(),
+			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
+				Status:  "Failed",
+				Message: "Unable to delete project",
+				Error:   err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{
