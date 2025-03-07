@@ -82,6 +82,7 @@ func DeleteFile(filePath string) error {
 			log.Debug("deleteFile: Failed deleting file: " + filePath)
 			return errors.New("file Not found")
 		}
+		log.Debug("DeleteFile: Filed deleted: " + filePath)
 	} else if errors.Is(err, os.ErrNotExist) {
 		log.Debug("deleteFile: File not found: " + filePath)
 		return errors.New("file not found")
