@@ -31,6 +31,7 @@ func AddProject(s projects.Service) fiber.Handler {
 
 		img, err := c.FormFile("image")
 		if err != nil {
+			log.Debug(err)
 			return c.Status(fiber.StatusBadRequest).JSON(presenter.FailedResponse{
 				Status:  "Failed",
 				Message: "Key: 'image' is not found or empty",

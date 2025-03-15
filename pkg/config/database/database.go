@@ -30,7 +30,11 @@ func Connect() *gorm.DB {
 	}
 	log.Print("Connected to database")
 	db.Logger = logger.Default.LogMode(logger.Info)
-	err = db.AutoMigrate(&model.Project{})
+	err = db.AutoMigrate(
+		&model.Project{},
+		&model.Auth{},
+		&model.User{},
+		)
 	if err != nil {
 		log.Fatal("Failed migrating database: " + err.Error())
 		return nil
